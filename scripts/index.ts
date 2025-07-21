@@ -92,72 +92,7 @@ async function testErrorHandling(): Promise<void> {
     }
 }
 
-// Coffee shop simulation using OOP
-console.log("\nCoffee Shop Simulation:");
-
-class CoffeeShop {
-    private machine: CoffeeMachine;
-    private orders: Array<{ recipe: Recipe, time: number }> = [];
-
-    constructor(machine: CoffeeMachine) {
-        this.machine = machine;
-    }
-
-    async serveCustomer(recipe: Recipe): Promise<number> {
-        const startTime = Date.now();
-        await brewCoffee(recipe);
-        const totalTime = Date.now() - startTime;
-
-        this.orders.push({ recipe, time: totalTime });
-        return totalTime;
-    }
-
-    getStats() {
-        const totalOrders = this.orders.length;
-        const avgTime = this.orders.reduce((sum, order) => sum + order.time, 0) / totalOrders || 0;
-
-        const popularRecipe = this.orders.reduce((acc, order) => {
-            acc[order.recipe.getName()] = (acc[order.recipe.getName()] || 0) + 1;
-            return acc;
-        }, {} as Record<string, number>);
-
-        return {
-            totalOrders,
-            averageTime: Math.round(avgTime) + "ms",
-            popularRecipes: popularRecipe
-        };
-    }
-}
-
-// Advanced async patterns
-console.log("\nAdvanced Async Patterns:");
-
-async function morningRush(): Promise<void> {
-    console.log("\nMorning rush starting...");
-
-    const shop = new CoffeeShop(coffeeMachine);
-
-    // Define customer orders
-    const orders = [
-        { customer: "Alice", recipe: espresso },
-        { customer: "Bob", recipe: latte },
-        { customer: "Charlie", recipe: americano }
-    ];
-
-    // Process orders sequentially (single coffee machine constraint)
-    for (const { customer, recipe } of orders) {
-        console.log(`\nOrder for ${customer}: ${recipe.getName()}`);
-        const time = await shop.serveCustomer(recipe);
-        console.log(`${customer}'s order completed in ${time}ms`);
-        await wait(1000); // Brief pause between orders
-    }
-
-    // Display statistics
-    console.log("\nMorning Rush Statistics:");
-    console.log(shop.getStats());
-}
-
-// Main demo execution
+// Demo execution
 console.log("\nRunning Complete Demo:");
 
 async function runDemo(): Promise<void> {
@@ -167,9 +102,6 @@ async function runDemo(): Promise<void> {
     // Demonstrate promise integration
     console.log("\nSimple brew demonstration:");
     await brewCoffee(espresso);
-
-    // Run coffee shop simulation
-    await morningRush();
 
     console.log("\nDemo completed! TypeScript + V8 provides seamless C++ integration.");
 }
