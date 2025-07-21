@@ -1,7 +1,13 @@
 #pragma once
 
+#include <chrono>
+#include <memory>
+#include <stdexcept>
 #include <string>
 #include <string_view>
+#include <thread>
+
+#include "Recipe.h"
 
 class CoffeeMachine {
  public:
@@ -17,15 +23,31 @@ class CoffeeMachine {
 
   bool canBrew() const noexcept { return isOn_ && !isBrewing_; }
 
-  void startBrewing() {
-    if (canBrew()) {
-      isBrewing_ = true;
+  std::string brew(const std::shared_ptr<Recipe>& recipe) {
+    if (!recipe) {
+      throw std::invalid_argument("No recipe provided");
     }
+
+    if (!canBrew()) {
+      throw std::runtime_error("Machine not ready to brew");
+    }
+
+    // Start brewing
+    isBrewing_ = true;
+
+    // Simulate brewing delay
+    std::this_thread::sleep_for(
+        std::chrono::milliseconds(recipe->getBrewTime())
+    );
+
+    // Stop brewing
+    isBrewing_ = false;
+
+    // Return success message
+    return "Coffee ready! Brewed " + recipe->getName();
   }
 
-  void stopBrewing() noexcept { isBrewing_ = false; }
-
-  const std::string &getName() const noexcept { return name_; }
+  const std::string& getName() const noexcept { return name_; }
 
  private:
   std::string name_;

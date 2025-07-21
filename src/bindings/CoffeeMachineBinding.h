@@ -1,9 +1,7 @@
 #pragma once
 
 #include <v8.h>
-#include <chrono>
 #include <memory>
-#include <thread>
 
 #include "../models/CoffeeMachine.h"
 #include "../models/Recipe.h"
@@ -127,38 +125,23 @@ class CoffeeMachineBinding {
     // Create and return a Promise
     auto resolver = v8::Promise::Resolver::New(context).ToLocalChecked();
 
-    if (!machine->canBrew()) {
-      resolver
-          ->Reject(
-              context,
-              v8::String::NewFromUtf8(isolate, "Machine not ready to brew")
-                  .ToLocalChecked()
-          )
-          .Check();
-    } else if (!recipe) {
-      resolver
-          ->Reject(
-              context,
-              v8::String::NewFromUtf8(isolate, "No recipe provided")
-                  .ToLocalChecked()
-          )
-          .Check();
-    } else {
-      machine->startBrewing();
+    try {
+      // Call the C++ brew method
+      std::string result = machine->brew(recipe);
 
-      // Simulate brewing delay
-      // Note: In production, this should be integrated with an event loop
-      std::this_thread::sleep_for(
-          std::chrono::milliseconds(recipe->getBrewTime())
-      );
-
-      machine->stopBrewing();
-
-      std::string result = "Coffee ready! Brewed " + recipe->getName();
+      // Resolve the promise with the result
       resolver
           ->Resolve(
               context,
               v8::String::NewFromUtf8(isolate, result.c_str()).ToLocalChecked()
+          )
+          .Check();
+    } catch (const std::exception &e) {
+      // Reject the promise with the error message
+      resolver
+          ->Reject(
+              context,
+              v8::String::NewFromUtf8(isolate, e.what()).ToLocalChecked()
           )
           .Check();
     }
