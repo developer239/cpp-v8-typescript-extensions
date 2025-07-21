@@ -144,6 +144,11 @@ make
 ./v8_demo
 ```
 
+```bash
+cd scripts
+npx -p typescript tsc
+```
+
 ## Implementation Notes
 
 ### Memory Management
