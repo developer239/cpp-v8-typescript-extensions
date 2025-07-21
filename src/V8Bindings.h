@@ -8,14 +8,14 @@
 
 class V8Bindings {
  public:
-  V8Bindings(v8::Isolate *isolate, v8::Local<v8::Context> context)
+  V8Bindings(v8::Isolate *isolate, const v8::Local<v8::Context> context)
       : isolate_(isolate), context_(context) {}
 
-  void Initialize() {
+  void Initialize() const {
     v8::HandleScope handleScope(isolate_);
 
     // Get global object
-    auto global = context_->Global();
+    const auto global = context_->Global();
 
     // Bind global functions (wait, console)
     GlobalFunctions::Bind(isolate_, context_, global);

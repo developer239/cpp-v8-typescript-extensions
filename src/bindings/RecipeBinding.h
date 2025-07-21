@@ -9,10 +9,10 @@
 class RecipeBinding {
  public:
   static void Bind(
-      v8::Isolate *isolate, v8::Local<v8::Context> context,
-      v8::Local<v8::Object> global
+      v8::Isolate *isolate, const v8::Local<v8::Context> context,
+      const v8::Local<v8::Object> global
   ) {
-    auto recipeTemplate = v8::FunctionTemplate::New(isolate);
+    const auto recipeTemplate = v8::FunctionTemplate::New(isolate);
     recipeTemplate->SetClassName(
         v8::String::NewFromUtf8(isolate, "Recipe").ToLocalChecked()
     );
@@ -22,7 +22,7 @@ class RecipeBinding {
         [](const v8::FunctionCallbackInfo<v8::Value> &args) {
           auto *isolate = args.GetIsolate();
           v8::HandleScope scope(isolate);
-          auto context = isolate->GetCurrentContext();
+          const auto context = isolate->GetCurrentContext();
 
           if (args.IsConstructCall()) {
             std::string name = "Custom Recipe";
@@ -44,7 +44,7 @@ class RecipeBinding {
               brewTime = args[3]->Int32Value(context).FromJust();
             }
 
-            auto recipe =
+            const auto recipe =
                 std::make_shared<Recipe>(name, strength, waterAmount, brewTime);
             V8ObjectWrapper<Recipe>::wrap(args.This(), recipe);
             args.GetReturnValue().Set(args.This());
@@ -53,7 +53,7 @@ class RecipeBinding {
     );
 
     // Instance template
-    auto instanceTemplate = recipeTemplate->InstanceTemplate();
+    const auto instanceTemplate = recipeTemplate->InstanceTemplate();
     instanceTemplate->SetInternalFieldCount(1);
 
     // Methods
@@ -62,7 +62,8 @@ class RecipeBinding {
         v8::FunctionTemplate::New(
             isolate,
             [](const v8::FunctionCallbackInfo<v8::Value> &args) {
-              if (auto recipe = V8ObjectWrapper<Recipe>::unwrap(args.This())) {
+              if (const auto recipe =
+                      V8ObjectWrapper<Recipe>::unwrap(args.This())) {
                 args.GetReturnValue().Set(
                     v8::String::NewFromUtf8(
                         args.GetIsolate(),
@@ -80,7 +81,8 @@ class RecipeBinding {
         v8::FunctionTemplate::New(
             isolate,
             [](const v8::FunctionCallbackInfo<v8::Value> &args) {
-              if (auto recipe = V8ObjectWrapper<Recipe>::unwrap(args.This())) {
+              if (const auto recipe =
+                      V8ObjectWrapper<Recipe>::unwrap(args.This())) {
                 args.GetReturnValue().Set(recipe->getStrength());
               }
             }
@@ -92,7 +94,8 @@ class RecipeBinding {
         v8::FunctionTemplate::New(
             isolate,
             [](const v8::FunctionCallbackInfo<v8::Value> &args) {
-              if (auto recipe = V8ObjectWrapper<Recipe>::unwrap(args.This())) {
+              if (const auto recipe =
+                      V8ObjectWrapper<Recipe>::unwrap(args.This())) {
                 args.GetReturnValue().Set(recipe->getBrewTime());
               }
             }
@@ -104,7 +107,8 @@ class RecipeBinding {
         v8::FunctionTemplate::New(
             isolate,
             [](const v8::FunctionCallbackInfo<v8::Value> &args) {
-              if (auto recipe = V8ObjectWrapper<Recipe>::unwrap(args.This())) {
+              if (const auto recipe =
+                      V8ObjectWrapper<Recipe>::unwrap(args.This())) {
                 args.GetReturnValue().Set(
                     v8::String::NewFromUtf8(
                         args.GetIsolate(),

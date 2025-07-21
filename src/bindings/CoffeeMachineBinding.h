@@ -10,10 +10,10 @@
 class CoffeeMachineBinding {
  public:
   static void Bind(
-      v8::Isolate *isolate, v8::Local<v8::Context> context,
-      v8::Local<v8::Object> global
+      v8::Isolate *isolate, const v8::Local<v8::Context> context,
+      const v8::Local<v8::Object> global
   ) {
-    auto coffeeTemplate = v8::FunctionTemplate::New(isolate);
+    const auto coffeeTemplate = v8::FunctionTemplate::New(isolate);
     coffeeTemplate->SetClassName(
         v8::String::NewFromUtf8(isolate, "CoffeeMachine").ToLocalChecked()
     );
@@ -31,7 +31,7 @@ class CoffeeMachineBinding {
               name = *str;
             }
 
-            auto machine = std::make_shared<CoffeeMachine>(name);
+            const auto machine = std::make_shared<CoffeeMachine>(name);
             V8ObjectWrapper<CoffeeMachine>::wrap(args.This(), machine);
             args.GetReturnValue().Set(args.This());
           }
@@ -39,7 +39,7 @@ class CoffeeMachineBinding {
     );
 
     // Instance template
-    auto instanceTemplate = coffeeTemplate->InstanceTemplate();
+    const auto instanceTemplate = coffeeTemplate->InstanceTemplate();
     instanceTemplate->SetInternalFieldCount(1);
 
     // Methods
@@ -48,7 +48,7 @@ class CoffeeMachineBinding {
         v8::FunctionTemplate::New(
             isolate,
             [](const v8::FunctionCallbackInfo<v8::Value> &args) {
-              if (auto machine =
+              if (const auto machine =
                       V8ObjectWrapper<CoffeeMachine>::unwrap(args.This())) {
                 machine->turnOn();
               }
@@ -61,7 +61,7 @@ class CoffeeMachineBinding {
         v8::FunctionTemplate::New(
             isolate,
             [](const v8::FunctionCallbackInfo<v8::Value> &args) {
-              if (auto machine =
+              if (const auto machine =
                       V8ObjectWrapper<CoffeeMachine>::unwrap(args.This())) {
                 machine->turnOff();
               }
@@ -79,7 +79,7 @@ class CoffeeMachineBinding {
         v8::FunctionTemplate::New(
             isolate,
             [](const v8::FunctionCallbackInfo<v8::Value> &args) {
-              if (auto machine =
+              if (const auto machine =
                       V8ObjectWrapper<CoffeeMachine>::unwrap(args.This())) {
                 args.GetReturnValue().Set(
                     v8::String::NewFromUtf8(
@@ -107,9 +107,9 @@ class CoffeeMachineBinding {
   static void brewCallback(const v8::FunctionCallbackInfo<v8::Value> &args) {
     auto *isolate = args.GetIsolate();
     v8::HandleScope scope(isolate);
-    auto context = isolate->GetCurrentContext();
+    const auto context = isolate->GetCurrentContext();
 
-    auto machine = V8ObjectWrapper<CoffeeMachine>::unwrap(args.This());
+    const auto machine = V8ObjectWrapper<CoffeeMachine>::unwrap(args.This());
     if (!machine) {
       args.GetReturnValue().SetUndefined();
       return;
@@ -118,16 +118,16 @@ class CoffeeMachineBinding {
     // Extract Recipe from argument
     std::shared_ptr<Recipe> recipe;
     if (args.Length() > 0 && args[0]->IsObject()) {
-      auto recipeObj = args[0].As<v8::Object>();
+      const auto recipeObj = args[0].As<v8::Object>();
       recipe = V8ObjectWrapper<Recipe>::unwrap(recipeObj);
     }
 
     // Create and return a Promise
-    auto resolver = v8::Promise::Resolver::New(context).ToLocalChecked();
+    const auto resolver = v8::Promise::Resolver::New(context).ToLocalChecked();
 
     try {
       // Call the C++ brew method
-      std::string result = machine->brew(recipe);
+      const std::string result = machine->brew(recipe);
 
       // Resolve the promise with the result
       resolver

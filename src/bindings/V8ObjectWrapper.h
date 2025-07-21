@@ -36,7 +36,7 @@ class V8ObjectWrapper {
     persistent.release();  // V8 now owns this
   }
 
-  static std::shared_ptr<T> unwrap(v8::Local<v8::Object> jsObject) {
+  static std::shared_ptr<T> unwrap(const v8::Local<v8::Object> jsObject) {
     if (jsObject->InternalFieldCount() == 0) {
       return nullptr;
     }

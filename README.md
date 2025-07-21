@@ -6,25 +6,6 @@ This project demonstrates the integration of Google's V8 JavaScript engine with 
 
 The demo implements a coffee machine simulation where C++ classes are exposed to JavaScript through V8 bindings. This pattern is useful for applications that need to provide scripting capabilities with modern JavaScript features.
 
-## Technical Architecture
-
-```
-src/
-├── models/                    # C++ business logic
-│   ├── CoffeeMachine.h       # Coffee machine implementation
-│   └── Recipe.h              # Recipe data model
-├── bindings/                 # V8 binding layer
-│   ├── V8ObjectWrapper.h     # Smart pointer-based object lifecycle management
-│   ├── CoffeeMachineBinding.h
-│   ├── RecipeBinding.h
-│   └── GlobalFunctions.h     # Global JS functions (wait, console)
-└── V8Bindings.h             # Binding aggregator
-
-scripts/
-├── index.ts                  # TypeScript demonstration
-└── types.d.ts               # Auto-generated TypeScript definitions
-```
-
 ## Key Features
 
 ### Native C++ Object Integration

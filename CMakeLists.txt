@@ -33,6 +33,8 @@ add_executable(v8_demo
     src/bindings/RecipeBinding.h
     src/bindings/GlobalFunctions.h
     src/V8Bindings.h
+        src/V8Platform.h
+        src/V8Runtime.h
 )
 
 # Include directories

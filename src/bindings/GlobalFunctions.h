@@ -8,8 +8,8 @@
 class GlobalFunctions {
  public:
   static void Bind(
-      v8::Isolate *isolate, v8::Local<v8::Context> context,
-      v8::Local<v8::Object> global
+      v8::Isolate *isolate, const v8::Local<v8::Context> context,
+      const v8::Local<v8::Object> global
   ) {
     // wait() function - returns a Promise that resolves after specified
     // milliseconds
@@ -29,17 +29,17 @@ class GlobalFunctions {
   static void waitCallback(const v8::FunctionCallbackInfo<v8::Value> &args) {
     auto *isolate = args.GetIsolate();
     v8::HandleScope scope(isolate);
-    auto context = isolate->GetCurrentContext();
+    const auto context = isolate->GetCurrentContext();
 
     if (args.Length() < 1 || !args[0]->IsNumber()) {
       args.GetReturnValue().SetUndefined();
       return;
     }
 
-    auto milliseconds = args[0]->Int32Value(context).FromJust();
+    const auto milliseconds = args[0]->Int32Value(context).FromJust();
 
     // Create Promise
-    auto resolver = v8::Promise::Resolver::New(context).ToLocalChecked();
+    const auto resolver = v8::Promise::Resolver::New(context).ToLocalChecked();
 
     // Simulate async wait with synchronous sleep
     // Note: In production, this should be integrated with an event loop
@@ -50,10 +50,10 @@ class GlobalFunctions {
   }
 
   static void setupConsole(
-      v8::Isolate *isolate, v8::Local<v8::Context> context,
-      v8::Local<v8::Object> global
+      v8::Isolate *isolate, const v8::Local<v8::Context> context,
+      const v8::Local<v8::Object> global
   ) {
-    auto console = v8::Object::New(isolate);
+    const auto console = v8::Object::New(isolate);
 
     // console.log implementation with proper object serialization
     console
@@ -78,19 +78,19 @@ class GlobalFunctions {
   ) {
     auto *isolate = args.GetIsolate();
     v8::HandleScope scope(isolate);
-    auto context = isolate->GetCurrentContext();
+    const auto context = isolate->GetCurrentContext();
 
     for (int i = 0; i < args.Length(); ++i) {
       if (i > 0) {
         std::cout << " ";
       }
 
-      auto arg = args[i];
+      const auto arg = args[i];
 
       if (arg->IsObject() && !arg->IsFunction() && !arg->IsArray()) {
         // Convert object to JSON string for display
-        auto global = context->Global();
-        auto json =
+        const auto global = context->Global();
+        const auto json =
             global
                 ->Get(
                     context,
@@ -99,16 +99,17 @@ class GlobalFunctions {
                 .ToLocalChecked()
                 .As<v8::Object>();
 
-        auto stringify = json->Get(
-                                 context,
-                                 v8::String::NewFromUtf8(isolate, "stringify")
-                                     .ToLocalChecked()
-        )
-                             .ToLocalChecked()
-                             .As<v8::Function>();
+        const auto stringify =
+            json->Get(
+                    context,
+                    v8::String::NewFromUtf8(isolate, "stringify")
+                        .ToLocalChecked()
+            )
+                .ToLocalChecked()
+                .As<v8::Function>();
 
         v8::Local<v8::Value> stringifyArgs[] = {arg};
-        auto result =
+        const auto result =
             stringify->Call(context, json, 1, stringifyArgs).ToLocalChecked();
 
         v8::String::Utf8Value str(isolate, result);
