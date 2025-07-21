@@ -19,7 +19,7 @@ console.log("\nSetting up Coffee Machine:");
 const coffeeMachine = new CoffeeMachine("Professional Barista 3000");
 console.log(`${coffeeMachine.getName()} is ready`);
 
-// Demonstrate JavaScript array methods with C++ objects
+// Array methods with C++ objects
 console.log("\nJavaScript Array Methods with C++ Objects:");
 
 const recipes = [espresso, americano, latte, customBlend];
@@ -40,7 +40,7 @@ recipeStats.forEach(({ name, strength, time }) => {
     console.log(`  ${name}: ${strength}% strength, ${time} brew time`);
 });
 
-// Demonstrate async/await with C++ promise integration
+// Async/await with C++ promise integration
 console.log("\nAsync Coffee Brewing:");
 
 async function brewCoffee(recipe: Recipe): Promise<void> {
@@ -176,5 +176,5 @@ async function runDemo(): Promise<void> {
 
 // Execute the demo
 runDemo().catch(error => {
-    console.error("Demo failed:", error);
+    console.log("Demo failed:", error);
 });
