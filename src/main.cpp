@@ -118,11 +118,89 @@ declare const console: {
     file.close();
 }
 
+// Simple class to manage V8 runtime state
+class V8Runtime {
+public:
+    V8Runtime() : isolate_(nullptr) {}
+
+    ~V8Runtime() {
+        if (isolate_) {
+            isolate_->Dispose();
+        }
+    }
+
+    // Initialize V8 environment and bindings
+    void initialize() {
+        // Create isolate
+        v8::Isolate::CreateParams createParams;
+        createParams.array_buffer_allocator = v8::ArrayBuffer::Allocator::NewDefaultAllocator();
+        isolate_ = v8::Isolate::New(createParams);
+        allocator_ = createParams.array_buffer_allocator;
+
+        // Enter isolate scope and create context
+        v8::Isolate::Scope isolateScope(isolate_);
+        v8::HandleScope handleScope(isolate_);
+
+        // Create and persist context
+        auto context = v8::Context::New(isolate_);
+        context_.Reset(isolate_, context);
+
+        // Enter context scope and initialize bindings
+        v8::Context::Scope contextScope(context);
+        bindings_ = std::make_unique<V8Bindings>(isolate_, context);
+        bindings_->Initialize();
+    }
+
+    // Execute JavaScript code
+    bool executeScript(const std::string& jsCode) {
+        if (!isolate_) {
+            std::cerr << "V8 runtime not initialized!" << std::endl;
+            return false;
+        }
+
+        // Re-establish scopes for script execution
+        v8::Isolate::Scope isolateScope(isolate_);
+        v8::HandleScope handleScope(isolate_);
+        auto context = context_.Get(isolate_);
+        v8::Context::Scope contextScope(context);
+
+        try {
+            // Execute JavaScript
+            std::cout << "\nRunning script:\n" << std::endl;
+            std::cout << "================================" << std::endl;
+
+            auto source = v8::String::NewFromUtf8(isolate_, jsCode.c_str()).ToLocalChecked();
+            auto script = v8::Script::Compile(context, source).ToLocalChecked();
+
+            auto result = script->Run(context);
+            if (result.IsEmpty()) {
+                std::cerr << "Script execution failed!" << std::endl;
+                return false;
+            } else {
+                std::cout << "================================" << std::endl;
+                std::cout << "\nScript completed successfully!" << std::endl;
+                return true;
+            }
+        } catch (const std::exception& e) {
+            std::cerr << "Error: " << e.what() << std::endl;
+            return false;
+        }
+    }
+
+    v8::ArrayBuffer::Allocator* getAllocator() { return allocator_; }
+
+private:
+    v8::Isolate* isolate_;
+    v8::Persistent<v8::Context> context_;
+    std::unique_ptr<V8Bindings> bindings_;
+    v8::ArrayBuffer::Allocator* allocator_;
+};
+
 int main() {
     // Generate TypeScript definitions
     generateTypeDefinitions("../scripts/types.d.ts");
 
-    // Initialize V8
+    // Initialize V8 platform
     v8::V8::InitializeICUDefaultLocation("");
     v8::V8::InitializeExternalStartupData("");
 
@@ -130,52 +208,31 @@ int main() {
     v8::V8::InitializePlatform(platform.get());
     v8::V8::Initialize();
 
-    // Create isolate
-    v8::Isolate::CreateParams createParams;
-    createParams.array_buffer_allocator = v8::ArrayBuffer::Allocator::NewDefaultAllocator();
-    auto *isolate = v8::Isolate::New(createParams); {
-        v8::Isolate::Scope isolateScope(isolate);
-        v8::HandleScope handleScope(isolate);
+    // Create and initialize V8 runtime
+    V8Runtime runtime;
+    runtime.initialize();
 
-        // Create context
-        auto context = v8::Context::New(isolate);
-        v8::Context::Scope contextScope(context);
+    // At this point, V8 is initialized and bindings are ready
+    // We can do other setup here if needed...
 
-        // Initialize bindings
-        V8Bindings bindings(isolate, context);
-        bindings.Initialize();
+    // Later, when we're ready to execute scripts:
+    try {
+        // Read JavaScript file
+        std::cout << "Loading JavaScript from ../scripts/index.js..." << std::endl;
+        std::string jsCode = readFile("../scripts/index.js");
 
-        try {
-            // Read JavaScript file
-            std::cout << "Loading JavaScript from ../scripts/index.js..." << std::endl;
-            std::string jsCode = readFile("../scripts/index.js");
-
-            // Execute JavaScript
-            std::cout << "\nRunning script:\n" << std::endl;
-            std::cout << "================================" << std::endl;
-
-            auto source = v8::String::NewFromUtf8(isolate, jsCode.c_str()).ToLocalChecked();
-            auto script = v8::Script::Compile(context, source).ToLocalChecked();
-
-            auto result = script->Run(context);
-            if (result.IsEmpty()) {
-                std::cerr << "Script execution failed!" << std::endl;
-            } else {
-                std::cout << "================================" << std::endl;
-                std::cout << "\nScript completed successfully!" << std::endl;
-            }
-        } catch (const std::exception& e) {
-            std::cerr << "Error: " << e.what() << std::endl;
-            std::cerr << "\nMake sure to compile TypeScript first:" << std::endl;
-            std::cerr << "  cd scripts && npx tsc" << std::endl;
-        }
+        // Execute the script
+        runtime.executeScript(jsCode);
+    } catch (const std::exception& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+        std::cerr << "\nMake sure to compile TypeScript first:" << std::endl;
+        std::cerr << "  cd scripts && npx tsc" << std::endl;
     }
 
     // Cleanup
-    isolate->Dispose();
+    delete runtime.getAllocator();
     v8::V8::Dispose();
     v8::V8::DisposePlatform();
-    delete createParams.array_buffer_allocator;
 
     return 0;
 }
