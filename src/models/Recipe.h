@@ -12,11 +12,13 @@ class Recipe {
         waterAmount_(std::max(waterAmount, 0)),
         brewTime_(std::max(brewTime, 0)) {}
 
-  [[nodiscard]] const std::string &getName() const noexcept { return name_; }
-  [[nodiscard]] int getStrength() const noexcept { return strength_; }
-  [[nodiscard]] int getBrewTime() const noexcept { return brewTime_; }
+  const std::string &getName() const noexcept { return name_; }
 
-  [[nodiscard]] std::string getDescription() const {
+  int getStrength() const noexcept { return strength_; }
+
+  int getBrewTime() const noexcept { return brewTime_; }
+
+  std::string getDescription() const {
     return name_ + " - Strength: " + std::to_string(strength_) +
            "%, Water: " + std::to_string(waterAmount_) +
            "ml, Time: " + std::to_string(brewTime_) + "ms";

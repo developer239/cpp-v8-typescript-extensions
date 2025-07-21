@@ -15,7 +15,7 @@ class CoffeeMachine {
     isBrewing_ = false;
   }
 
-  [[nodiscard]] bool canBrew() const noexcept { return isOn_ && !isBrewing_; }
+  bool canBrew() const noexcept { return isOn_ && !isBrewing_; }
 
   void startBrewing() {
     if (canBrew()) {
@@ -25,7 +25,7 @@ class CoffeeMachine {
 
   void stopBrewing() noexcept { isBrewing_ = false; }
 
-  [[nodiscard]] const std::string &getName() const noexcept { return name_; }
+  const std::string &getName() const noexcept { return name_; }
 
  private:
   std::string name_;
