@@ -23,20 +23,6 @@ if(CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64")
     add_definitions(-DV8_TARGET_ARCH_ARM64)
 endif()
 
-# Download esbuild for TypeScript compilation
-include(FetchContent)
-FetchContent_Declare(
-    esbuild
-    URL https://registry.npmjs.org/@esbuild/darwin-arm64/-/darwin-arm64-0.19.5.tgz
-    DOWNLOAD_EXTRACT_TIMESTAMP ON
-)
-FetchContent_MakeAvailable(esbuild)
-
-# Copy esbuild binary to build directory
-file(COPY ${esbuild_SOURCE_DIR}/bin/esbuild
-     DESTINATION ${CMAKE_BINARY_DIR}/bin
-     FILE_PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ)
-
 # Main executable
 add_executable(v8_demo
     src/main.cpp
@@ -62,9 +48,6 @@ if(APPLE)
         INSTALL_RPATH "/opt/homebrew/lib;/usr/local/lib"
     )
 endif()
-
-# Copy scripts to build directory for runtime access
-file(COPY scripts DESTINATION ${CMAKE_BINARY_DIR})
 
 # Enable compile commands for better IDE support
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)

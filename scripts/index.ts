@@ -1,5 +1,3 @@
-/// <reference path="./types.d.ts" />
-
 console.log("V8 TypeScript Demo - Coffee Brewing Simulation\n");
 
 // Define coffee recipes with varying parameters

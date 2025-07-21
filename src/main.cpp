@@ -10,22 +10,14 @@
 
 #include "V8Bindings.h"
 
-std::string compileTypeScript(std::string_view tsFile) {
-    std::string command = "./bin/esbuild ";
-    command.append(tsFile);
-    command.append(" --bundle --format=iife");
-
-    std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(command.c_str(), "r"), pclose);
-    if (!pipe) {
-        return "";
+std::string readFile(const std::string& filepath) {
+    std::ifstream file(filepath);
+    if (!file.is_open()) {
+        throw std::runtime_error("Failed to open file: " + filepath);
     }
 
     std::stringstream buffer;
-    std::array<char, 128> temp{};
-    while (fgets(temp.data(), temp.size(), pipe.get()) != nullptr) {
-        buffer << temp.data();
-    }
-
+    buffer << file.rdbuf();
     return buffer.str();
 }
 
@@ -128,7 +120,6 @@ declare const console: {
 
 int main() {
     // Generate TypeScript definitions
-    generateTypeDefinitions("scripts/types.d.ts");
     generateTypeDefinitions("../scripts/types.d.ts");
 
     // Initialize V8
@@ -154,20 +145,30 @@ int main() {
         V8Bindings bindings(isolate, context);
         bindings.Initialize();
 
-        // Compile TypeScript
-        std::cout << "Compiling TypeScript..." << std::endl;
-        auto jsCode = compileTypeScript("scripts/index.ts");
+        try {
+            // Read JavaScript file
+            std::cout << "Loading JavaScript from ../scripts/index.js..." << std::endl;
+            std::string jsCode = readFile("../scripts/index.js");
 
-        // Execute JavaScript
-        std::cout << "\nRunning script:\n" << std::endl;
-        std::cout << "================================" << std::endl;
+            // Execute JavaScript
+            std::cout << "\nRunning script:\n" << std::endl;
+            std::cout << "================================" << std::endl;
 
-        auto source = v8::String::NewFromUtf8(isolate, jsCode.c_str()).ToLocalChecked();
-        auto script = v8::Script::Compile(context, source).ToLocalChecked();
-        script->Run(context).ToLocalChecked();
+            auto source = v8::String::NewFromUtf8(isolate, jsCode.c_str()).ToLocalChecked();
+            auto script = v8::Script::Compile(context, source).ToLocalChecked();
 
-        std::cout << "================================" << std::endl;
-        std::cout << "\nScript completed successfully!" << std::endl;
+            auto result = script->Run(context);
+            if (result.IsEmpty()) {
+                std::cerr << "Script execution failed!" << std::endl;
+            } else {
+                std::cout << "================================" << std::endl;
+                std::cout << "\nScript completed successfully!" << std::endl;
+            }
+        } catch (const std::exception& e) {
+            std::cerr << "Error: " << e.what() << std::endl;
+            std::cerr << "\nMake sure to compile TypeScript first:" << std::endl;
+            std::cerr << "  cd scripts && npx tsc" << std::endl;
+        }
     }
 
     // Cleanup
