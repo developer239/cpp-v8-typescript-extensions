@@ -162,16 +162,8 @@ This integration pattern is valuable for:
 - Embedded applications with user-defined logic
 - Desktop applications with plugin systems
 - IoT devices with customizable automation
-- Testing frameworks with JavaScript test definitions
 
 ## Future Enhancements
 
 - Integration with libuv for proper async I/O
-- Node.js compatible module system
-- Chrome DevTools debugging support
 - Performance profiling integration
-- WebAssembly interop for additional languages
-
----
-
-For questions or contributions, please refer to the project issue tracker.
