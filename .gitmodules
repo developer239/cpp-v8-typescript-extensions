@@ -1,0 +1,3 @@
+[submodule "external/v8pp"]
+	path = external/v8pp
+	url = https://github.com/pmed/v8pp.git
